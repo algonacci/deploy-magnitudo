@@ -1,0 +1,173 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f0f0f5;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+header {
+    text-align: center;
+    background-color: #673F69;
+    color: #fff;
+    padding: 30px 0;
+}
+
+header h1 {
+    margin: 0;
+    margin-bottom: 13px;
+    font-size: 2.7em;
+}
+
+header p {
+    margin: 0;
+    font-size: 1.4em;
+}
+
+main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.input-section {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 80%;
+    max-width: 1200px;
+    margin: 20px auto;
+}
+
+.input-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 0 15px;
+}
+
+.input-group label {
+    font-size: 1.7em;
+    font-weight: bold;
+    margin-bottom: 5px;
+    color: #333;
+}
+
+.input-group input {
+    width: 350px;
+    padding: 7px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    text-align: center;
+    font-size: 1.2em;
+    color: #333;
+    background-color: #f0f0f0;
+}
+
+.warning {
+    color: red;
+    font-size: 0.9em;
+    display: none;
+}
+
+button {
+    padding: 17px 35px;
+    background-color: #ff6600;
+    color: #fff;
+    font-size: 1.4em;
+    font-weight: bold;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 20px;
+}
+
+button:hover {
+    background-color: #e68a00;
+}
+
+.copy-btn {
+    background-color: #4caf50;
+}
+
+.copy-btn:hover {
+    background-color: #45a049;
+}
+
+.excel-btn {
+    background-color: #2196f3;
+}
+
+.excel-btn:hover {
+    background-color: #0069d9;
+}
+
+.pdf-btn {
+    background-color: #f44336;
+}
+
+.pdf-btn:hover {
+    background-color: #e0461e;
+}
+
+.result-section {
+    margin-top: 20px;
+    font-size: 1.45em;
+    text-align: center;
+}
+
+.result-section h2 {
+    color: #ff3333;
+}
+
+.number {
+    font-size: 1.5em;
+    font-weight: bold;
+    color: #ff9900;
+}
+
+/* Styles for the table */
+.history-section {
+    width: 80%;
+    max-width: 1200px;
+    margin: 20px 0;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+table, th, td {
+    border: 1px solid black;
+}
+
+th, td {
+    padding: 12px;
+    text-align: center;
+}
+
+th {
+    background-color: #f2f2f2;
+    font-size: 1.1em;
+    font-weight: bold;
+}
+
+td {
+    font-size: 1em;
+    color: #333;
+}
+
+footer {
+    text-align: center;
+    padding: 7px 0;
+    background-color: #673F69;
+    color: #fff;
+    font-size: 1.2em;
+}

@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Prediksi Magnitudo Gempa Bumi</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/style.css') }}"
+    />
+  </head>
+  <body>
+    <header>
+      <h1>Sistem Prediksi Magnitudo Gempa Bumi</h1>
+      <p>
+        Menggunakan Data Geografis dan Kedalaman untuk Prediksi Gempa Bumi
+        Global (1965 - 2016)
+      </p>
+    </header>
+
+    <main>
+      <div class="input-section">
+        <div class="input-group">
+          <label for="tanggal">Tanggal</label>
+          <input type="date" id="tanggal" placeholder="Masukkan Tanggal" />
+        </div>
+        <div class="input-group">
+          <label for="lintang">Lintang</label>
+          <input
+            type="number"
+            id="lintang"
+            min="-77"
+            max="86"
+            placeholder="Masukkan Lintang antara (-77) - 86"
+          />
+          <span id="lintang-warning" class="warning"></span>
+        </div>
+        <div class="input-group">
+          <label for="bujur">Bujur</label>
+          <input
+            type="number"
+            id="bujur"
+            min="-180"
+            max="180"
+            placeholder="Masukkan Bujur antara (-180) - 180"
+          />
+          <span id="bujur-warning" class="warning"></span>
+        </div>
+        <div class="input-group">
+          <label for="kedalaman">Kedalaman</label>
+          <input
+            type="number"
+            id="kedalaman"
+            min="0"
+            max="700"
+            placeholder="Masukkan Kedalaman antara 0 - 700"
+          />
+          <span id="kedalaman-warning" class="warning"></span>
+        </div>
+      </div>
+
+      <button id="predict-btn" disabled>Prediksi Magnitudo</button>
+
+      <div class="result-section" id="result-section" style="display: none">
+        <h2>
+          Magnitudo yang diprediksi adalah
+          <span id="magnitude">0.99</span> dengan akurasi prediksi sebesar
+          <span id="accuracy">85%</span>
+        </h2>
+      </div>
+
+      <div class="history-section">
+        <h2>Riwayat Input Pengguna</h2>
+        <div class="button-group">
+          <button id="copy-btn" class="copy-btn">Copy</button>
+          <button id="excel-btn" class="excel-btn">Excel</button>
+          <button id="pdf-btn" class="pdf-btn">PDF</button>
+        </div>
+        <table id="history-table">
+          <thead>
+            <tr>
+              <th>Tanggal</th>
+              <th>Lintang</th>
+              <th>Bujur</th>
+              <th>Kedalaman</th>
+              <th>Magnitudo</th>
+            </tr>
+          </thead>
+          <tbody id="history-table-body">
+            <!-- Rows will be populated here by JavaScript -->
+          </tbody>
+        </table>
+      </div>
+    </main>
+
+    <footer>
+      <p>&copy; 2024 Eva Novia. All rights reserved.</p>
+    </footer>
+
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.21/jspdf.plugin.autotable.min.js"></script>
+    <script>
+      const predictBtn = document.getElementById("predict-btn");
+      const tanggalInput = document.getElementById("tanggal");
+      const lintangInput = document.getElementById("lintang");
+      const bujurInput = document.getElementById("bujur");
+      const kedalamanInput = document.getElementById("kedalaman");
+
+      let lastInputs = {};
+
+      function validateInput() {
+        const lintang = lintangInput.value;
+        const bujur = bujurInput.value;
+        const kedalaman = kedalamanInput.value;
+
+        const lintangValid = lintang >= -77 && lintang <= 86;
+        const bujurValid = bujur >= -180 && bujur <= 180;
+        const kedalamanValid = kedalaman >= 0 && kedalaman <= 700;
+
+        if (lintangValid && bujurValid && kedalamanValid) {
+          predictBtn.disabled = false;
+        } else {
+          predictBtn.disabled = true;
+        }
+      }
+
+      lintangInput.addEventListener("input", function () {
+        const lintang = this.value;
+        const warning = document.getElementById("lintang-warning");
+        if (lintang < -77 || lintang > 86) {
+          warning.textContent = "Lintang harus antara -77 dan 86.";
+          warning.style.display = "block";
+        } else {
+          warning.style.display = "none";
+        }
+        validateInput();
+      });
+
+      bujurInput.addEventListener("input", function () {
+        const bujur = this.value;
+        const warning = document.getElementById("bujur-warning");
+        if (bujur < -180 || bujur > 180) {
+          warning.textContent = "Bujur harus antara -180 dan 180.";
+          warning.style.display = "block";
+        } else {
+          warning.style.display = "none";
+        }
+        validateInput();
+      });
+
+      kedalamanInput.addEventListener("input", function () {
+        const kedalaman = this.value;
+        const warning = document.getElementById("kedalaman-warning");
+        if (kedalaman < 0 || kedalaman > 700) {
+          warning.textContent = "Kedalaman harus antara 0 dan 700.";
+          warning.style.display = "block";
+        } else {
+          warning.style.display = "none";
+        }
+        validateInput();
+      });
+
+      predictBtn.addEventListener("click", () => {
+        const tanggal = tanggalInput.value;
+        const lintang = lintangInput.value;
+        const bujur = bujurInput.value;
+        const kedalaman = kedalamanInput.value;
+
+        const currentInputs = { tanggal, lintang, bujur, kedalaman };
+
+        if (JSON.stringify(currentInputs) === JSON.stringify(lastInputs)) {
+          alert(
+            "Input sudah diproses. Silakan masukkan data baru untuk prediksi berikutnya."
+          );
+          return;
+        }
+
+        fetch("http://127.0.0.1:5000/predict", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            date: tanggal,
+            latitude: lintang,
+            longitude: bujur,
+            depth: kedalaman,
+          }),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            document.getElementById("result-section").style.display = "block";
+            document.getElementById("magnitude").textContent =
+              data.predictedMagnitude.toFixed(2);
+            document.getElementById("accuracy").textContent =
+              data.predictionAccuracy.toFixed(2) + "%";
+
+            const historyTableBody =
+              document.getElementById("history-table-body");
+            const newRow = document.createElement("tr");
+            newRow.innerHTML = `
+                    <td>${tanggal}</td>
+                    <td>${lintang}</td>
+                    <td>${bujur}</td>
+                    <td>${kedalaman}</td>
+                    <td>${data.predictedMagnitude.toFixed(2)}</td>
+                `;
+            historyTableBody.appendChild(newRow);
+
+            lastInputs = currentInputs;
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+          });
+      });
+
+      document.getElementById("copy-btn").addEventListener("click", () => {
+        const range = document.createRange();
+        range.selectNode(document.getElementById("history-table"));
+        window.getSelection().removeAllRanges();
+        window.getSelection().addRange(range);
+        document.execCommand("copy");
+        alert("Riwayat input telah disalin ke clipboard.");
+      });
+
+      document.getElementById("excel-btn").addEventListener("click", () => {
+        const table = document.getElementById("history-table");
+        const wb = XLSX.utils.table_to_book(table);
+        const wbout = XLSX.write(wb, { bookType: "xlsx", type: "binary" });
+
+        function s2ab(s) {
+          const buf = new ArrayBuffer(s.length);
+          const view = new Uint8Array(buf);
+          for (let i = 0; i < s.length; i++) view[i] = s.charCodeAt(i) & 0xff;
+          return buf;
+        }
+
+        const blob = new Blob([s2ab(wbout)], {
+          type: "application/octet-stream",
+        });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "history.xlsx";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      });
+
+      document.getElementById("pdf-btn").addEventListener("click", () => {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        doc.autoTable({ html: "#history-table" });
+        doc.save("history.pdf");
+      });
+    </script>
+  </body>
+</html>
